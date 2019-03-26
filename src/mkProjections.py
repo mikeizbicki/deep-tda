@@ -71,7 +71,7 @@ with tf.Session() as sess:
 
     max_data=Xtrain.shape[0]
     #while stop<max_data:
-    for i in range(0,max_data/args.batchsize+1):
+    for i in range(0,int(max_data/args.batchsize+1)):
         print(''+str(datetime.datetime.now())+': i=',i)
         start=i*args.batchsize
         stop=min((i+1)*args.batchsize,max_data)
