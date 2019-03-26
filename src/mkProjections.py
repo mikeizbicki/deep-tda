@@ -96,21 +96,22 @@ with tf.Session() as sess:
         img_resize = model.preprocess(img_resize) #,is_training=False)
         middles=sess.run(model.get_middles(), {inputs: img_resize})
 
-        # first_block = np.array(middles[0][0])
-        print("middles: ", middles)
-        print("type(middles): ", type(middles))
-        before = np.array(middles[0])
-        print("before.shape: ", before.shape)
+        # Grabbing 56x56 data
+        # TODO: Find better name than first_block
         first_block = np.array(middles[0][0])[:,:,0]
-        print("first_block.shape: ", first_block.shape)
+        min_matrix = np.min(first_block)
+        max_matrix = np.max(first_block)
+
+        print("min_matrix: ", min_matrix)
+        print("max_matrix: ", max_matrix)
 
         print("Generating Barcode!")
-        make_barcode.generate_barcode(first_block, i)
+        make_barcode.generate_barcode(first_block, i, generate_history=True)
 
         # for arr,mid in zip(arrays,middles):
             # arr.append(mid)
 
-        if i == 3:
+        if i == 100:
             exit()
 
     #print('middles=',middles)
