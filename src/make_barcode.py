@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ripser import ripser
+from ripser import ripser, Ripser
 
 
 def generate_barcode(data, label):
