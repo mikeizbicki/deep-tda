@@ -57,6 +57,7 @@ arrays = [ f.create_earray(
 print('computing projections')
 
 import datetime
+import make_barcode
 
 tf.get_default_graph().finalize()
 with tf.Session() as sess:
@@ -85,7 +86,13 @@ with tf.Session() as sess:
         img_resize = model.preprocess(img_resize) #,is_training=False)
         middles=sess.run(model.get_middles(), {inputs: img_resize})
 
-        for arr,mid in zip(arrays,middles):
-            arr.append(mid)
+        first_block = middles[0]
+        make_barcode.generate_barcode(first_block, i)
+
+        # for arr,mid in zip(arrays,middles):
+            # arr.append(mid)
+
+        if i == 3:
+            exit()
 
     #print('middles=',middles)
