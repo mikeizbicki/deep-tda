@@ -59,6 +59,16 @@ print('computing projections')
 import datetime
 import make_barcode
 
+def process_block(data):
+
+    """
+    Takes block data and reshapes it
+    for Ripser
+    """
+
+    pass
+
+
 tf.get_default_graph().finalize()
 with tf.Session() as sess:
     coord = tf.train.Coordinator()
@@ -86,7 +96,15 @@ with tf.Session() as sess:
         img_resize = model.preprocess(img_resize) #,is_training=False)
         middles=sess.run(model.get_middles(), {inputs: img_resize})
 
-        first_block = middles[0]
+        # first_block = np.array(middles[0][0])
+        print("middles: ", middles)
+        print("type(middles): ", type(middles))
+        before = np.array(middles[0])
+        print("before.shape: ", before.shape)
+        first_block = np.array(middles[0][0])[:,:,0]
+        print("first_block.shape: ", first_block.shape)
+
+        print("Generating Barcode!")
         make_barcode.generate_barcode(first_block, i)
 
         # for arr,mid in zip(arrays,middles):
