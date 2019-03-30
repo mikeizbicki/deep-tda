@@ -26,7 +26,25 @@ import tensornets as nets
 import cv2
 import numpy as np
 
+def filter_photo(Xtrain, Ytrain, class_no=0):
+
+    """
+    Filter photo by class number
+    """
+
+    x_train_filt = Xtrain[Ytrain.reshape(-1,) == class_no]
+    y_train_filt = Ytrain[Ytrain.reshape(-1,) == class_no]
+
+    print("x_train_filt.shape: ", x_train_filt.shape)
+    print("x_train_filt: ", x_train_filt)
+
+    return x_train_filt, y_train_filt
+
 (Xtrain,Ytrain),(Xtest,Ytest)=tf.keras.datasets.cifar10.load_data()
+
+Xtrain, Ytrain = filter_photo(Xtrain, Ytrain)
+
+exit()
 
 inputs = tf.placeholder(tf.float32, [None, 224, 224, 3])
 model = nets.ResNet50(inputs,is_training=False)
