@@ -64,9 +64,21 @@ def process_block(data):
     """
     Takes block data and reshapes it
     for Ripser
+
+    :params data: middles from the tf.session graph execution
+    :returns: numpy array representing (batch, (data, data, features))
     """
 
-    pass
+    blocks_processed = []
+    for ix, single_block in enumerate(data):
+        block_flattened = []
+        for each_ibatch in single_block:
+            flat_block = each_ibatch.flatten()
+            block_flattend.append(flat_block)
+
+        blocks_processed.append(block_flattened)
+
+    return np.array(blocks_processed)
 
 
 tf.get_default_graph().finalize()
@@ -98,7 +110,10 @@ with tf.Session() as sess:
 
         # Grabbing 56x56 data
         # TODO: Find better name than first_block
-        first_block = np.array(middles[0][0])[:,:,0]
+        # first_block = np.array(middles[0][0])[:,:,0]
+        first_block = process_block(middles)
+        print("first_block.shape: ", first_block.shape)
+        exit()
         min_matrix = np.min(first_block)
         max_matrix = np.max(first_block)
 
