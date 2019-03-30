@@ -74,11 +74,16 @@ def process_block(data):
         block_flattened = []
         for each_ibatch in single_block:
             flat_block = each_ibatch.flatten()
-            block_flattend.append(flat_block)
+            print("flat_block.shape: ", flat_block.shape)
+            block_flattened.append(flat_block)
+
+        block_flattened = np.array(block_flattened)
+
+        print("block_flattened.shape: ", block_flattened.shape)
 
         blocks_processed.append(block_flattened)
 
-    return np.array(blocks_processed)
+    return blocks_processed
 
 
 tf.get_default_graph().finalize()
@@ -112,7 +117,8 @@ with tf.Session() as sess:
         # TODO: Find better name than first_block
         # first_block = np.array(middles[0][0])[:,:,0]
         first_block = process_block(middles)
-        print("first_block.shape: ", first_block.shape)
+        print("len(first_block): ", len(first_block))
+        print("first_block[0].shape: ", first_block[0].shape)
         exit()
         min_matrix = np.min(first_block)
         max_matrix = np.max(first_block)
