@@ -35,16 +35,11 @@ def filter_photo(Xtrain, Ytrain, class_no=0):
     x_train_filt = Xtrain[Ytrain.reshape(-1,) == class_no]
     y_train_filt = Ytrain[Ytrain.reshape(-1,) == class_no]
 
-    print("x_train_filt.shape: ", x_train_filt.shape)
-    print("x_train_filt: ", x_train_filt)
-
     return x_train_filt, y_train_filt
 
 (Xtrain,Ytrain),(Xtest,Ytest)=tf.keras.datasets.cifar10.load_data()
 
 Xtrain, Ytrain = filter_photo(Xtrain, Ytrain)
-
-exit()
 
 inputs = tf.placeholder(tf.float32, [None, 224, 224, 3])
 model = nets.ResNet50(inputs,is_training=False)
@@ -134,18 +129,12 @@ with tf.Session() as sess:
         # Grabbing 56x56 data
         # TODO: Find better name than first_block
         # first_block = np.array(middles[0][0])[:,:,0]
-        first_block = process_block(middles)
-        print("len(first_block): ", len(first_block))
-        print("first_block[0].shape: ", first_block[0].shape)
-        exit()
-        min_matrix = np.min(first_block)
-        max_matrix = np.max(first_block)
-
-        print("min_matrix: ", min_matrix)
-        print("max_matrix: ", max_matrix)
+        block_list = process_block(middles)
 
         print("Generating Barcode!")
-        make_barcode.generate_barcode(first_block, i, generate_history=True)
+        for ix, block in enumerate(block_list):
+            label_name = "batch_{batch}_block_{block}".format(block=ix, batch=i)
+            make_barcode.generate_barcode(block, label_name)
 
         # for arr,mid in zip(arrays,middles):
             # arr.append(mid)
