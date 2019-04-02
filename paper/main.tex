@@ -1,0 +1,77 @@
+\documentclass{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage[round]{natbib}   % omit 'round' option if you prefer square brackets
+\bibliographystyle{plainnat}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks   = true, %Colours links instead of ugly boxes
+  urlcolor     = blue, %Colour for external hyperlinks
+  linkcolor    = blue, %Colour of internal links
+  citecolor    = blue  %Colour of citations
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newtheorem{corollary}{Corollary}
+\newtheorem{claim}{Claim}
+\newtheorem{theorem}{Theorem}
+\newtheorem{example}{Example}
+\newtheorem{lemma}{Lemma}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\vecspan}{span}
+\DeclareMathOperator*{\affspan}{aff}
+\DeclareMathOperator*{\subG}{subG}
+\DeclareMathOperator*{\tr}{tr}
+\DeclareMathOperator*{\E}{\mathbb{E}}
+
+\newcommand{\str}[1]{\texttt{#1}}
+\newcommand{\defn}[1]{\textit{#1}}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\trans}[1]{{#1}^{\top}}
+
+\newcommand{\abs}[1]{\lvert{#1}\rvert}
+\newcommand{\ltwo}[1]{\lVert {#1} \rVert_2}
+
+\newcommand{\w}{\mathbf w}
+\newcommand{\what}{\hat\w}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\y}{y}
+
+%\newcommand{\relu}{\sigma_{\text{RELU}}}
+\newcommand{\relu}{\sigma}
+
+\newcommand{\ignore}[1]{}
+\newcommand{\fixme}[1]{\textcolor{red}{\textbf{FIXME:} {#1}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{lemma}
+    Let $X=\{\x_1,...,\x_n\}$ be a set of vectors in $\R^d$ and $\sigma$ be the RELU activation function.
+    Then,
+    \begin{equation}
+        \ltwo{\x_i-\x_j} \ge \ltwo{\sigma(\x_i)-\sigma(\x_j)}
+    \end{equation}
+    for all $i,j$ in $\{1,...,n\}$.
+\end{lemma}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliography{main}
+
+
+\end{document}
