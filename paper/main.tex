@@ -25,6 +25,8 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{example}{Example}
 \newtheorem{lemma}{Lemma}
+\newtheorem{question}{Question}
+\newtheorem{fact}{Fact}
 
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -42,34 +44,224 @@
 \newcommand{\trans}[1]{{#1}^{\top}}
 
 \newcommand{\abs}[1]{\lvert{#1}\rvert}
-\newcommand{\ltwo}[1]{\lVert {#1} \rVert_2}
+\newcommand{\ltwo}[1]{\lVert {#1} \rVert}
 
 \newcommand{\w}{\mathbf w}
 \newcommand{\what}{\hat\w}
-\newcommand{\x}{\mathbf{x}}
-\newcommand{\y}{y}
+\newcommand{\x}{\mathbf x}
+\newcommand{\y}{\mathbf y}
 
 %\newcommand{\relu}{\sigma_{\text{RELU}}}
 \newcommand{\relu}{\sigma}
 
 \newcommand{\ignore}[1]{}
 \newcommand{\fixme}[1]{\textcolor{red}{\textbf{FIXME:} {#1}}}
+\newcommand{\todo}[1]{{\textbf{TODO:} {#1}}}
 
+\newcommand{\emin}{\lambda_{\text{min}}}
+\newcommand{\emax}{\lambda_{\text{max}}}
+
+\DeclareMathOperator{\maxpool}{\textup{\texttt{maxpool}}}
+\newcommand{\covnum}[2]{\mathcal N_{#1}(#2)}
+\newcommand{\rips}[2]{\mathcal R_{#1}(#2)}
+\newcommand{\pd}[1]{\mathcal {PD}(#1)}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
-\begin{lemma}
-    Let $X=\{\x_1,...,\x_n\}$ be a set of vectors in $\R^d$ and $\sigma$ be the RELU activation function.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{What We Know}
+
+Let $X=\{\x_1,...,\x_n\}$, where each $\x_i\in\R^d$.
+
+\newcommand{\elem}[2]{{#2}^{(#1)}}
+
+\begin{fact}
+    Let $A : \R^{e\times d}$ with minimum and maximum eigenvalues $\emin$ and $\emax$.
     Then,
     \begin{equation}
-        \ltwo{\x_i-\x_j} \ge \ltwo{\sigma(\x_i)-\sigma(\x_j)}
+        \emin\ltwo{\x} \le \ltwo{A\x} \le \emax\ltwo{\x}.
     \end{equation}
-    for all $i,j$ in $\{1,...,n\}$.
+\end{fact}
+
+\begin{lemma}
+    Let $\sigma$ be a convex activation function satisfying $\sigma(x)\ge x$ for all $x$.
+    Then,
+    \begin{equation}
+        \ltwo{\sigma(\x_i)-\sigma(\x_j)}
+        \le
+        \ltwo{\x_i-\x_j} 
+    \end{equation}
+    for all $i$, and $j$.
+    In particular, $\sigma$ may be the relu, leaky relu, or logistic activation functions.
 \end{lemma}
 
+\begin{proof}
+    We have that
+    \begin{align}
+        \ltwo{\sigma(\x_i) - \sigma(\x_j)}^2 
+        &=
+        \sum_{k=1}^d (\sigma(\elem k\x_i) - \sigma(\elem k\x_j))^2
+        \\&\le
+        \sum_{k=1}^d (\sigma(\elem k\x_i - \elem k\x_j))^2
+        \\&\le
+        \sum_{k=1}^d (\elem k\x_i - \elem k\x_j)^2
+        \\&= 
+        \ltwo{\x_i - \x_j}^2 
+        ,
+    \end{align}
+    where the first inequality from convexity of $\sigma$ and the second from $\sigma(x)\ge x$.
+    \fixme{Is this correct?}
+\end{proof}
+
+\begin{lemma}
+    Let $d$ be a multiple of 2, and $\maxpool : \R^d \to \R^{d/2}$ be the max pooling function.
+    That is,
+    \begin{equation}
+        \elem{i}{\maxpool(\x)} = \max\{\elem{2i}\x,\elem{2i+1}\x\}
+        .
+    \end{equation}
+    If $\elem k\x\ge0$ for all $k$, then
+    \begin{equation}
+        \tfrac12\ltwo{\x} \le \ltwo{\maxpool(\x)} \le \ltwo{\x}.
+    \end{equation}
+\end{lemma}
+
+\begin{proof}
+    We can write
+    \begin{equation}
+        \ltwo{\maxpool(\x)}^2
+        =
+        \sum_{k=1}^{d/2} {\elem k {\maxpool(\x)}}{}^2
+        =
+        \sum_{k=1}^{d/2} \max\{\elem{2k}\x,\elem{2k+1}\x\}^2
+        \label{eq:pf:maxpool}
+        .
+    \end{equation}
+    To get the rightmost inequality, we apply the fact that $\max\{a,b\}^2 \le a^2 + b^2$ for all $a,b\ge0$ to \eqref{eq:pf:maxpool} to get
+    \begin{align}
+        \ltwo{\maxpool(\x)}^2
+        \le
+        \sum_{k=1}^{d} (\elem{k}\x)^2
+        =
+        \ltwo{\x}^2
+        .
+    \end{align}
+    For the left inequality,
+    we apply the fact that $\max\{a,b\} \ge \tfrac12(a+b)$ to \eqref{eq:pf:maxpool} to get
+    \begin{align}
+        \ltwo{\maxpool(\x)}^2
+        &\ge
+        \sum_{k=1}^{d/2} \tfrac14(\elem{2k}\x+\elem{2k+1}\x)^2
+        \\&=
+        \sum_{k=1}^{d/2} \tfrac14((\elem{2k}\x)^2+2\elem{2k}\x\elem{2k+1}\x+(\elem{2k+1}\x)^2)
+        \\&\ge
+        \sum_{k=1}^{d/2} \tfrac14((\elem{2k}\x)^2+(\elem{2k+1}\x)^2)
+        \\&=
+        \tfrac14\ltwo{\x}^2
+        .
+    \end{align}
+\end{proof}
+
+\begin{question}
+    Let $\covnum\epsilon X$ denote the $\epsilon$-covering number of $X$.
+    What is the relationship between $\covnum\epsilon X$, $\covnum\epsilon {AX}$, $\covnum\epsilon {\sigma X}$, and $\covnum\epsilon{\maxpool X}$?
+\end{question}
+
+\begin{question}
+    Let $\rips\epsilon X$ denote the Rips complex of $X$.
+    What is the relationship between $\rips\epsilon X$, $\rips\epsilon {AX}$, $\rips\epsilon {\sigma X}$, and $\rips\epsilon{\maxpool X}$?
+\end{question}
+
+\begin{question}
+    Let $\pd\epsilon X$ denote the persistence diagram of $X$.
+    What is the relationship between $\pd X$, $\pd{AX}$, $\pd{\sigma X}$, and $\pd{\maxpool X}$?
+\end{question}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Related Work}
+
+\subsection{machine learning + TDA}
+
+\citet{chen2019topological} introduce a differentiable regularization term based on the 0-homology of data.
+The regularization term is a piecewise linear approximation to a norm of the persistence diagram of the classifier's boundary.
+They perform experiments on kernel logistic regression against other functional and geometric regularizers,
+but it's not clear how to extend this to deep neural networks.
+
+\citet{rieck2019neural} present a theory of \defn{neural persistence} (NP),
+which uses 0-homology persistence diagrams to characterize the capacity of neural networks.
+For each layer in the graph,
+they construct a persistence diagram based on the layer's node weights,
+and the NP is the $p$-norm of this diagram.
+They provide two theorems that bound a network's NP,
+but there is no theoretical result on how the neural persistence affects a network's performance.
+They introduce a heuristic stopping rule based on the NP and suggest using this as an alternative to a validation set,
+but their experiments are pretty limited.
+
+It is well known that shallow but wide neural networks can universally approximate any function over a compact space.
+\citet{johnson2019deep} shows that deep but narrow networks are not universal approximators using techniques from TDA to analyze the topological properties of the network.
+(Many similar papers have been submitted and rejected; see: 
+\url{https://openreview.net/forum?id=r1VPNiA5Fm}, 
+\url{https://openreview.net/forum?id=B1TTpYKgx}.)
+
+\citet{guss2018characterizing,ramamurthy2018topological} claim to bound the capacity of deep neural networks,
+but haven't been published yet.
+
+\subsection{theory of TDA}
+
+Theorem 4 of \citet{chazal2015convergence} provides a general tool for bounding the expected error of a persistence diagram.
+
+\todo{I need to review the following in more detail to find the specific results that may be useful.}
+\citet{chazal2014stochastic} provides tools for persistence landscapes.
+\citet{chazal2012structure} is a book on the stability of persistence diagrams.
+\citet{chazal2015subsampling} propose what amounts to a divide and conquer approach to computing persistence diagrams.
+Their theoretical results likely have more broad applications.
+\citet{chazal2018density} use kernel functions to provide bounds on the convergence of persistence diagrams to their expectation.
+
+\subsubsection{embeddings}
+
+Persistence diagrams can be equipped with the \defn{diagram distance} to form a metric space.
+Many works have attempted to linearize this metric space \citep[e.g.][]{zielinski2018persistence,le2018persistence,hofer2017deep,kusano2016persistence,carriere2017sliced,cang2017topologynet,anirudh2016riemannian,obayashi2018persistence,adams2017persistence,kwitt2015statistical}.
+The goal of most work along these lines is to generate features from persistence diagrams,
+and use these features as input to machine learning algorithms.
+In contrast, \citet{chazal2018density} use kernel functions to provide bounds on the convergence of persistence diagrams to their expectation.
+They have a particularly good review of the existing theory on this convergence.
+
+\citet{carriere2018metric} prove that for any such linearization to be bi-Lipschitz, 
+the resulting Hilbert space must be infinite dimensional.
+They also show that in a number of existing infinite dimensional linearizations,
+the Lipschitz bounds depend on the number of components in the persistence diagram,
+which is undesirable.
+
+\subsection{theory of deep learning}
+
+\citet{zhang2016understanding,neyshabur2017exploring} ask the question: 
+Why do deep neural networks generalize well?
+See also: \url{https://openreview.net/forum?id=BJxOHs0cKm}.
+\citet{jakubovitz2018generalization} provides an elementary survey of why this is an important question to ask.
+
+Theorem 20.6 of \citet{shalev2014understanding} shows that the VC dimension of a shallow neural network using the sign activation function grows as $O(E\log E)$, 
+where $E$ is the total number of parameters in the network.
+\citet{bartlett2017nearly} and \citet{harvey2017nearly} show that the VC dimension of deep relu networks grows as $O(WL\log(W))$,
+where $W$ is the number of weights per layer and $L$ the number of layers.
+This result is nearly tight because the VC dimension for some networks is lower bounded by $\Omega(WL\log(W/L))$.
+
+\citet{zhou2018compressibility} prevents non-trivial PAC bounds based on model compressibility.
+\citet{barron2018approximation} presents generalization bounds in terms of the $L_1$ norm of the parameters.
+\citet{neyshabur2018role} argues that overparameterization is important for generalization.
+\citet{perez2018deep} argues that there is an implicit regularization that exponentially biases models towards simpler explanations.
+\citet{mou2018dropout} provide generalization bounds based on dropout.
+\citet{zhang2019all} provides empirical evidence that many layers in a network are irrelevant for the final prediction,
+and this justifies the fact that the VC dimension is too course a measure of model complexity.
+
+\subsection{images}
+
+\citet{carlsson2008local} show that the space of $3\times3$ image patches have the 2 dimensional topology of a Klein bottle.
+The naive ambient space is 9 dimensional,
+but 7 dimensional after mean centering and whitening.
 
 \bibliography{main}
 
