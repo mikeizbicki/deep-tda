@@ -87,15 +87,15 @@ Let $X=\{\x_1,...,\x_n\}$, where each $\x_i\in\R^d$.
 \end{fact}
 
 \begin{lemma}
-    Let $\sigma$ be a convex activation function satisfying $\sigma(x)\ge x$ for all $x$.
+    Let $\sigma:\R\to\R$ be a $\lambda$-Lipschitz activation function.
     Then,
     \begin{equation}
         \ltwo{\sigma(\x_i)-\sigma(\x_j)}
         \le
-        \ltwo{\x_i-\x_j} 
+        \lambda\ltwo{\x_i-\x_j} 
     \end{equation}
     for all $i$, and $j$.
-    In particular, $\sigma$ may be the relu, leaky relu, or logistic activation functions.
+    In particular, $\sigma$ may be the relu, leaky relu, or sigmoid activation functions.
 \end{lemma}
 
 \begin{proof}
@@ -103,17 +103,19 @@ Let $X=\{\x_1,...,\x_n\}$, where each $\x_i\in\R^d$.
     \begin{align}
         \ltwo{\sigma(\x_i) - \sigma(\x_j)}^2 
         &=
-        \sum_{k=1}^d (\sigma(\elem k\x_i) - \sigma(\elem k\x_j))^2
+        \sum_{k=1}^d \abs{\sigma(\elem k\x_i) - \sigma(\elem k\x_j)}^2
         \\&\le
-        \sum_{k=1}^d (\sigma(\elem k\x_i - \elem k\x_j))^2
-        \\&\le
-        \sum_{k=1}^d (\elem k\x_i - \elem k\x_j)^2
+        \sum_{k=1}^d (\lambda\abs{\elem k\x_i - \elem k\x_j})^2
+        \\&=
+        \lambda^2\sum_{k=1}^d \abs{\elem k\x_i - \elem k\x_j}^2
+        %\sum_{k=1}^d (\sigma(\elem k\x_i - \elem k\x_j))^2
+        %\\&\le
+        %\sum_{k=1}^d (\elem k\x_i - \elem k\x_j)^2
         \\&= 
-        \ltwo{\x_i - \x_j}^2 
-        ,
+        \lambda^2\ltwo{\x_i - \x_j}^2 
+        .
     \end{align}
-    where the first inequality from convexity of $\sigma$ and the second from $\sigma(x)\ge x$.
-    \fixme{Is this correct?}
+    Taking the square root of both sides gives the stated result.
 \end{proof}
 
 \begin{lemma}
@@ -163,6 +165,7 @@ Let $X=\{\x_1,...,\x_n\}$, where each $\x_i\in\R^d$.
         \tfrac14\ltwo{\x}^2
         .
     \end{align}
+    Taking the square root of both sides gives the stated result.
 \end{proof}
 
 \begin{question}
