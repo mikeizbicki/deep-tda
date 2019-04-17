@@ -62,9 +62,13 @@
 \newcommand{\emax}{\lambda_{\text{max}}}
 
 \DeclareMathOperator{\maxpool}{\textup{\texttt{maxpool}}}
+\DeclareMathOperator{\ddimop}{\textup{dim}}
+\newcommand{\ddim}[1]{\ddimop(#1)}
 \newcommand{\covnum}[2]{\mathcal N_{#1}(#2)}
 \newcommand{\rips}[2]{\mathcal R_{#1}(#2)}
 \newcommand{\pd}[1]{\mathcal {PD}(#1)}
+\newcommand{\elem}[2]{{#2}^{(#1)}}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -72,11 +76,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{What We Know}
 
 Let $X=\{\x_1,...,\x_n\}$, where each $\x_i\in\R^d$.
-
-\newcommand{\elem}[2]{{#2}^{(#1)}}
+Without a subscript, $\x$ is an arbitrary $\x_i$.
 
 \begin{fact}
     Let $A : \R^{e\times d}$ with minimum and maximum eigenvalues $\emin$ and $\emax$.
@@ -168,9 +173,35 @@ Let $X=\{\x_1,...,\x_n\}$, where each $\x_i\in\R^d$.
     Taking the square root of both sides gives the stated result.
 \end{proof}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Working on}
+
 \begin{question}
     Let $\covnum\epsilon X$ denote the $\epsilon$-covering number of $X$.
     What is the relationship between $\covnum\epsilon X$, $\covnum\epsilon {AX}$, $\covnum\epsilon {\sigma X}$, and $\covnum\epsilon{\maxpool X}$?
+\end{question}
+
+\fixme{
+\begin{lemma}
+    Let $A : \R^{e\times d}$ satisfying XXX. 
+    Then,
+    \begin{equation}
+        \covnum\epsilon X 
+        ~~~?~~~ 
+        \covnum\epsilon{AX}
+        .
+    \end{equation}
+\end{lemma}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Things we don't know}
+
+\begin{question}
+    Let $\ddim X$ denote the doubling dimension of $X$.
+    What is the relationship between $\ddim X$, $\ddim {AX}$, $\ddim {\sigma X}$, and $\ddim{\maxpool X}$?
 \end{question}
 
 \begin{question}
