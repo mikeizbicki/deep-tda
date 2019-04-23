@@ -1,11 +1,9 @@
 \documentclass{article}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+
 
 \usepackage[round]{natbib}   % omit 'round' option if you prefer square brackets
 \bibliographystyle{plainnat}
@@ -18,13 +16,13 @@
   citecolor    = blue  %Colour of citations
 }
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newtheorem{corollary}{Corollary}
 \newtheorem{claim}{Claim}
-\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
 \newtheorem{lemma}{Lemma}
+\newtheorem{question}{Question}
+\newtheorem{theorem}{Theorem}
 
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -55,21 +53,135 @@
 \newcommand{\ignore}[1]{}
 \newcommand{\fixme}[1]{\textcolor{red}{\textbf{FIXME:} {#1}}}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \begin{document}
 
-\begin{lemma}
-    Let $X=\{\x_1,...,\x_n\}$ be a set of vectors in $\R^d$ and $\sigma$ be the RELU activation function.
-    Then,
-    \begin{equation}
-        \ltwo{\x_i-\x_j} \ge \ltwo{\sigma(\x_i)-\sigma(\x_j)}
-    \end{equation}
-    for all $i,j$ in $\{1,...,n\}$.
+\section{Introduction}\label{sec:intro}
+In this article, we'll describe how the ResNet's matrix operations affect data and holes therein.
+We'll define basic topological and metric concepts in Section \ref{sec:metric}.
+Then, we'll define our matrx operations and describe how they affect holes in data in Section \ref{sec:holes}.
+We'll use this in Section \ref{sec:result} to describe what role they play in neural net classification.
+
+\subsection{Metric Spaces}\label{sec:metric}
+The category \texttt{Met} of metric spaces has metric spaces as its objects and metric homomorphisms (continuous functions that do not increase pairwise distance) as its morphisms.
+
+For some $n\in\N$, let $f:(\R^n,d)\to(\R^n,d)$ be an automorphism between metric spaces with metric outer measure $\mu$.
+
+\begin{definition}
+For a given positive integer $0\le k<n$, define the \emph{open $k$-ball} of radius $\epsilon\in\R_{>0}$ centered at $q\in\R^{k+1}$ to be $B_d(q,\epsilon)=\{p\in\R^{k+1} \mid d(q,p)< \epsilon \}$.
+% The $k$-sphere $S_k$ is its boundary, and the closed $k$-ball is their union.
+\end{definition}
+
+\begin{lemma}\label{lem:bigger}
+Let $Y\subset \R^n$ be the image of a continuous injective map from $B_d(q,\epsilon_0)$. Then, $\mu(f(X))\le \mu(Y)$.
+\end{lemma}
+\begin{proof}
+Suppose $f$ makes $Y$ bigger:
+$$\mu(Y)<\mu(f(Y)).$$
+Then, there's an open ball in $Y$ which gets bigger:
+\begin{align}\label{eq:bigger}
+    \exists q\in Y, \delta\in \R_{>0} \text{ such that } \mu(B_d(q,\delta))< \mu(f(B_d(q,\delta)))
+\end{align}
+Since $f$ is a morphism, it decreases the distance between the center and any other point in the ball:
+$$\forall p\in B_d(q,\delta),  d(f(q), f(p))\le d(q,p).$$
+Thus, the image of ball lies inside a ball of the same size:
+\begin{align*}
+    f(B_d(q,\delta)) &\subset B_d(f(q), \delta), \text{ which implies }\\
+    \mu(f(B_d(q,\delta)) &\le \mu(B_d(f(q), \delta)) \text{ since $\mu$ is a measure.}
+\end{align*}
+Since this contradicts Inequality \ref{eq:bigger}, $f$ can only make $Y$ smaller.
+\begin{align*}
+    \mu(Y) &\nless \mu(f(Y)) \text{, or equivalently} \\
+    \mu(f(Y)) &\le \mu(Y).
+\end{align*}
+\end{proof}
+Intuitively, this lemma says that morphisms in the category of metric spaces with metric outer measures maintain or decrease the measure of a given compact subspace.
+
+\begin{definition}
+A \emph{$k$-dimensional hole} is the bounded $(k+1)$-dimensional component of $\R^n-\partial Y$, where $\partial Y\subset \R^{k}$ is the boundary of the image of a continuous injective map from $ B_d(q,\epsilon_0)$.
+\end{definition}
+
+In the following sections, we'll prove that the rectifier, among other activation functions, is a morphism and use our lemma to explain what it does to $k$-dimensional holes.
+
+\section{Homological Side Effects}\label{sec:holes}
+We'll discuss activation functions Section \ref{sec:act} and max pool in Section \ref{sec:pool}.
+
+\subsection{Activation Functions}\label{sec:act}
+\subsubsection{ReLU}
+\begin{definition}
+The \emph{ReLU activation function} $\sigma:(\R^n,||\cdot||_2)\to(\R^n,||\cdot||_2)$ is defined as the positive parts of its arguments, where $\R^n$ has the usual ordering.
+\[
+(y_1,\dots,y_n)\mapsto (\max(0, y_1), \dots, \max(0,y_n))
+\]
+\end{definition}
+
+\begin{lemma}\label{lem:relu}
+ReLU is a morphism in the category of metric spaces.
 \end{lemma}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{proof}
+Let $x_1,x_2\in (\R^n,||\cdot||_2)$, where $\R^n$ has the usual ordering.
+First, we'll prove what ReLU does to the $j$th component in three cases, where each case is a possible pair of signs.
+
+\begin{enumerate}
+    \item If $x_{1_j},x_{2_j}\ge0$, then $\sigma(x_{1_j})=x_{1_j}$ and $\sigma(x_{2_j}) = x_{2_j}$. Thus, $(\sigma(x_{1_j})-\sigma(x_{2_j}))^2 = (x_{1_j}-x_{2_j})^2$.
+    \item If $x_{1_j},x_{2_j}\le0$, then $\sigma(x_{1_j})=0$ and $\sigma(x_{2_j})=0$. Thus, $(\sigma(x_{1_j})-\sigma(x_{2_j}))^2=(0-0)^2=0\le (x_{1_j}-x_{2_j})^2$.
+    \item Assume $x_{1_j}\ge 0, x_{2_j}\le0$ without loss of generality. 
+     Since $(x_{1_j}-0)\le (x_{1_j}-x_{2_j})$, $(\sigma(x_{1_j})-\sigma(x_{2_j}))^2=(x_{1_j}-0)^2 \le (x_{1_j}-x_{2_j})^2$.
+\end{enumerate}
+In each of three cases,
+\[
+(\sigma(x_{i_k})-\sigma(x_{j_k}))^2 \le (x_{1_j}-x_{2_j})^2.
+\]
+Since each term is dominated,
+\begin{align*}
+    \sum_{k=1}^d (\sigma(x_{i_k})-\sigma(x_{j_k}))^2 &\le \sum_{k=1}^d (x_{i_k}-x_{j_k})^2,\\
+     \sqrt{\sum_{k=1}^d (\sigma(x_{i_k})-\sigma(x_{j_k}))^2} &\le \sqrt{\sum_{k=1}^d (x_{i_k}-x_{j_k})^2},\\
+     \ltwo{\sigma(\x_i)-\sigma(\x_j)} &\le \ltwo{\x_i-\x_j}.
+\end{align*}.
+Lastly, $\relu$ is continuous since it's a component-wise application of the continuous function $\max$.
+\end{proof}
+
+According to Lemma \ref{lem:bigger}, ReLU transforms any set of vectors $X=\{\x_1,...,\x_m\}\subset \R^n$, which define a $k$-dimensional hole, into a hole equal or smaller in size.
+
+\begin{question}
+How does ReLU affect metric entropy?
+\end{question}
+% https://izbicki.me/public/papers/dissertation.pdf
+
+\subsubsection{Others}
+Any other morphism in the category of metric spaces is non-increasing on $k$-dimensional holes.
+The authors believe that any activation function which preserves order and maps to a smaller object is a morphism.
+
+\subsubsection{Matrix Representation}
+Alternately, you can view activation functions as mapping $m\times n$ matrices to $m\times n$ matrices, component-wise.
+
+\subsection{Max Pool}\label{sec:pool}
+Let $X=\{x_1,\dots,x_m\}\subset(\R^n,d)$ be represented by an $m\times n$ matrix for some even $m,n\in 2\N$.
+Consider a $3\times 3$ pool $p$ with stride $2$.
+Then, $p:\R^{mn}\to\R^{\frac{m}{2}\frac{n}{2}}$ maps $m\times n$ matrices to $\frac{m}{2}\times\frac{n}{2}$ matrices.
+\begin{definition}
+max pool
+\end{definition}
+You can think about max pooling over a row, and then max pooling over a column. Is that equivalent and does it help?
+\begin{question}
+
+\end{question}
+
+
+\section{ResNet}\label{sec:result}
+ResNet composes many operations, including convolutions, ReLUs, and pools, which may affect holes in different ways, including, creating, destroying, growing, shrinking, and identity. 
+
+\begin{question}
+How does max pool affect pairwise distances in our data?
+\end{question}
+
+\begin{question}
+How does this apply to neural networks like ResNet?
+\end{question}
+\begin{enumerate}
+\item We have described what ReLU does to data, but we have yet to describe what the other operations do.
+\item It remains unclear what roles these play in learning.
+\end{enumerate}
 
 \bibliography{main}
 
