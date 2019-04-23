@@ -54,12 +54,12 @@ load_model_weights = model.pretrained()
 # filename = args.output_dir + '/' + args.model + '-' + args.data + '.h5'
 # f = tables.open_file(filename, mode='w')
 # atom = tables.Float64Atom()
-# 
-# 
+#
+#
 # def sanitize_tensor_name(t):
 #     return t.replace('/', '_').split(':')[0]
-# 
-# 
+#
+#
 # arrays = [f.create_earray(
 #     f.root,
 #     sanitize_tensor_name(t.name),
@@ -73,7 +73,6 @@ load_model_weights = model.pretrained()
 
 
 def process_block(data):
-
     """
     Takes block data and reshapes it
     for Ripser
@@ -115,9 +114,12 @@ def default_original():
             img_resize = np.zeros([args.batchsize, 224, 224, 3])
             for j in range(start, stop):
                 j -= start
-                img_resize[j, :, :, 0] = cv2.resize(img[j, :, :, 0], (224, 224))
-                img_resize[j, :, :, 1] = cv2.resize(img[j, :, :, 1], (224, 224))
-                img_resize[j, :, :, 2] = cv2.resize(img[j, :, :, 2], (224, 224))
+                img_resize[j, :, :, 0] = cv2.resize(
+                    img[j, :, :, 0], (224, 224))
+                img_resize[j, :, :, 1] = cv2.resize(
+                    img[j, :, :, 1], (224, 224))
+                img_resize[j, :, :, 2] = cv2.resize(
+                    img[j, :, :, 2], (224, 224))
             img_resize = model.preprocess(img_resize)  # ,is_training=False)
             # middles=sess.run(model.get_middles(), {inputs: img_resize})
             all_middles = sess.run(model.get_all(), {inputs: img_resize})
@@ -131,7 +133,6 @@ def default_original():
 
 
 def single_batch_run():
-
     """
     Single Batch Run
     """
@@ -149,7 +150,7 @@ def single_batch_run():
         max_data = Xtrain.shape[0]
         # while stop<max_data:
 
-        args.batchsize = 64 # max_data // 10
+        args.batchsize = 64  # max_data // 10
         print(args.batchsize)
 
         for i in range(0, int(max_data / args.batchsize + 1)):
@@ -162,9 +163,12 @@ def single_batch_run():
 
             for j in range(start, stop):
                 j -= start
-                img_resize[j, :, :, 0] = cv2.resize(img[j, :, :, 0], (224, 224))
-                img_resize[j, :, :, 1] = cv2.resize(img[j, :, :, 1], (224, 224))
-                img_resize[j, :, :, 2] = cv2.resize(img[j, :, :, 2], (224, 224))
+                img_resize[j, :, :, 0] = cv2.resize(
+                    img[j, :, :, 0], (224, 224))
+                img_resize[j, :, :, 1] = cv2.resize(
+                    img[j, :, :, 1], (224, 224))
+                img_resize[j, :, :, 2] = cv2.resize(
+                    img[j, :, :, 2], (224, 224))
 
             print("len(img_resize): ", len(img_resize))
             img_resize = model.preprocess(img_resize)  # ,is_training=False)

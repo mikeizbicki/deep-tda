@@ -19,10 +19,12 @@ def generate(i, all_block_list, names=[]):
         block_lists[-1].append(({"block": block, "name": names[j]}))
     for j, block_list in enumerate(block_lists):
         all_images += generate_diagrams('{0}'.format(directory
-                                                 ),
-                                [block["block"] for block in block_list],
-                                names=[block["name"] for block in block_list],
-                                c=len(all_images))
+                                                     ),
+                                        [block["block"]
+                                            for block in block_list],
+                                        names=[block["name"]
+                                               for block in block_list],
+                                        c=len(all_images))
     # imageio.mimsave('{0}/all.gif'.format(directory), all_images, fps=3)
     return all_images
 
@@ -35,7 +37,7 @@ def generate_diagrams(dn, block_list, names=[], c=0):
     """
     directory = dn
     os.makedirs(directory, exist_ok=True)  # succeeds even if directory exists.
-    os.makedirs(directory+"/pickle_data", exist_ok=True)
+    os.makedirs(directory + "/pickle_data", exist_ok=True)
     images = []
     diagrams_list = []
 
