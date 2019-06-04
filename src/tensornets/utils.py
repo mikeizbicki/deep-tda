@@ -286,9 +286,11 @@ def var_scope(name):
                     setattr(x, 'print_outputs', lambda: print_outputs(_name))
                     setattr(x, 'print_weights', lambda: print_weights(_scope))
                     setattr(x, 'print_summary', lambda: print_summary(_scope))
-                    setattr(x, 'get_all', lambda: get_all(_scope, tensor_names=tensor_names))
+                    setattr(x, 'get_all', lambda lay_no: get_all(_scope, tensor_names=tensor_names)[lay_no])
                     setattr(x, 'get_names', lambda: tensor_names)
+
                 return x
+
         return wrapper
     return decorator
 

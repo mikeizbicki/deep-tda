@@ -1,10 +1,13 @@
+import argparse
 import imageio
 from math import inf
 import numpy as np
+from math import sqrt
 import matplotlib.pyplot as plt
 import os
 import pickle
 from ripser import ripser, Rips
+from persim import plot_diagrams
 
 
 def generate(i, all_block_list, names=[]):
@@ -25,6 +28,7 @@ def generate(i, all_block_list, names=[]):
                                         names=[block["name"]
                                                for block in block_list],
                                         c=len(all_images))
+    # visualize(all_images)
     # imageio.mimsave('{0}/all.gif'.format(directory), all_images, fps=3)
     return all_images
 
@@ -67,7 +71,7 @@ def generate_diagrams(dn, block_list, names=[], c=0):
             pickle.dump(diagrams, f)
         fn += ".png"
 
-        images.append(1)
+        images.append(fn)
     return images
 
     """
@@ -87,3 +91,43 @@ def generate_diagrams(dn, block_list, names=[], c=0):
     images.append(imageio.imread(fn))
     imageio.mimsave('{0}/all.gif'.format(directory), images, fps=3)
     """
+
+def gen_pd(dir_layers, layer_no):
+    dir_layers += '/layer_'+str(layer_no)
+    # Read pickle data
+    layer = []
+    with open('{dir_layers}/all.pickle'.format(dir_layers=dir_layers, layer_no=layer_no), 'rb') as f:
+        layer = np.vstack(pickle.load(f))
+    # Generate Vietoris-Rips Complex
+    rips = Rips(verbose=False)
+    diagrams = rips.fit_transform(layer)
+    fig = plt.figure()
+    # Save persistence diagrams as image
+    for k, diagram in enumerate(diagrams):
+        plt.scatter(diagram[:,0], diagram[:,1])
+        for r, row in enumerate(diagram):
+            diagram[r] = np.array([(row[0]+row[1])/sqrt(2), (row[1]-row[0])/sqrt(2)]) # rotate entries 45 degrees
+    plt.title("Layer {0}".format(layer_no))
+    plt.savefig("images/layer_{layer_no}.png".format(layer_no=layer_no))
+    plt.clf()
+
+    # Save rotated persistence diagrams as image
+    for k, diagram in enumerate(diagrams):
+        plt.scatter(diagram[:,0], diagram[:,1])
+    plt.title("Layer 5 Landscape")
+    plt.savefig("{landscape_dir}/layer_{layer_no}.png".format(landscape_dir=landscape_dir, layer_no=layer_no))
+    plt.clf()
+    print("done")
+
+if __name__ == "__main__":
+    # Parse aruments
+    parser = argparse.ArgumentParser('Create persistence diagram')
+    g = parser.add_argument_group('computation parameters')
+    g.add_argument('--dir', default='pickle_data')
+    g.add_argument('--layer_no', type=int, default=0)
+    args = parser.parse_args()
+
+    landscape_dir = 'images/landscape'
+    os.makedirs(landscape_dir, exist_ok=True)
+
+    gen_pd(args.dir, args.layer_no)

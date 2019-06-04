@@ -261,3 +261,6 @@ dmypy.json
 
 src/projections/*
 src/images/*
+
+*.pickle
+*.png
