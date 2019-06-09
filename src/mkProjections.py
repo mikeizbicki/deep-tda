@@ -1,7 +1,6 @@
-#!../venv/bin/python3
+#/usr/bin/env python3
 
 import datetime
-import tables
 import os
 import numpy as np
 import cv2
@@ -13,7 +12,6 @@ from tqdm import tqdm
 
 # from __future__ import print_function
 
-
 def filter_photo(Xtrain, Ytrain, class_no=0):
     """
     Filter photo by class number
@@ -24,25 +22,24 @@ def filter_photo(Xtrain, Ytrain, class_no=0):
 
     return x_train_filt, y_train_filt
 
-
 def single_layer_run(layer_no, batch_size):
 
     """
-    Single Batch Run
+    Single Layer Run
     """
 
     tf.get_default_graph().finalize()
     with tf.Session() as sess:
-        results = sess.list_devices()
-        print("GPU?: ", results)
+        if layer_no is 0:
+            print("Devices: ", sess.list_devices())
+
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
         sess.run(load_model_weights)
 
-
         for i in tqdm(range(0, int(max_data / batch_size + 1))):
-            print('' + str(datetime.datetime.now()) + ': i=', i)
+            #print('' + str(datetime.datetime.now()) + ': i=', i)
+
             start = i * batch_size
             stop = min((i + 1) * batch_size, max_data)
 
@@ -72,27 +69,38 @@ def single_layer_run(layer_no, batch_size):
 
 
 if __name__ == '__main__':
-    print('processing cmd line args')
+    # processing cmd line args
     parser = argparse.ArgumentParser('generate layer projections')
     g1 = parser.add_argument_group('computation options')
     g1.add_argument('--layer_no', type=int, default=0)
     g1.add_argument('--batchsize', type=int, default=12)
-
     args = parser.parse_args()
 
-    dir_str = 'pickle_data/layer_{layer_no}'.format(layer_no=args.layer_no)
-    directory = os.makedirs(dir_str, exist_ok=True)
 
+    # Filter datasets
     (Xtrain, Ytrain), (Xtest, Ytest) = tf.keras.datasets.cifar10.load_data()
     Xtrain, Ytrain = filter_photo(Xtrain, Ytrain)
     max_data = Xtrain.shape[0]
 
+    # Configure
     inputs = tf.placeholder(tf.float32, [None, 224, 224, 3])
     model = nets.ResNet50(inputs, is_training=False)
     load_model_weights = model.pretrained()
-    
+
+    dir_str = 'pickle_data/layer_{layer_no}'.format(layer_no=args.layer_no)
+    directory = os.makedirs(dir_str, exist_ok=True)
+
+    # Filter layers
+    tensor_names = []
+    with open('pickle_data/tensor_names.pickle', 'rb') as ph:
+        tensor_names = [p for p,name in enumerate(pickle.load(ph)) if 'relu' in name]
+
+    if args.layer_no is 0:
+        print("Batch Size: ", args.batchsize)
+        print("Max Data: ", max_data)
+        print("ReLU Layers:", tensor_names, len(tensor_names))
+        print("-----------------------------")
     print("Layer No: ", args.layer_no)
-    print("Batch Size: ", args.batchsize)
-    print("Max Data: ", max_data)
-    print("-----------------------------")
-    single_layer_run(args.layer_no, args.batchsize)
+
+    if args.layer_no in tensor_names:
+        single_layer_run(args.layer_no, args.batchsize)

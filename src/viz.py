@@ -1,3 +1,4 @@
+
 import argparse
 import imageio
 from math import inf
@@ -92,32 +93,52 @@ def generate_diagrams(dn, block_list, names=[], c=0):
     imageio.mimsave('{0}/all.gif'.format(directory), images, fps=3)
     """
 
+
 def gen_pd(dir_layers, layer_no):
-    dir_layers += '/layer_'+str(layer_no)
+    dir_layers += '/layer_' + str(layer_no)
     # Read pickle data
     layer = []
     with open('{dir_layers}/all.pickle'.format(dir_layers=dir_layers, layer_no=layer_no), 'rb') as f:
-        layer = np.vstack(pickle.load(f))
+        layer = pickle.load(f)
+        print(layer.shape, layer[0].shape)
     # Generate Vietoris-Rips Complex
     rips = Rips(verbose=False)
     diagrams = rips.fit_transform(layer)
     fig = plt.figure()
     # Save persistence diagrams as image
     for k, diagram in enumerate(diagrams):
-        plt.scatter(diagram[:,0], diagram[:,1])
+        plt.scatter(diagram[:, 0], diagram[:, 1])
         for r, row in enumerate(diagram):
-            diagram[r] = np.array([(row[0]+row[1])/sqrt(2), (row[1]-row[0])/sqrt(2)]) # rotate entries 45 degrees
+            # rotate entries 45 degrees
+            diagram[r] = np.array(
+                [(row[0] + row[1]) / sqrt(2), (row[1] - row[0]) / sqrt(2)])
     plt.title("Layer {0}".format(layer_no))
     plt.savefig("images/layer_{layer_no}.png".format(layer_no=layer_no))
     plt.clf()
 
     # Save rotated persistence diagrams as image
     for k, diagram in enumerate(diagrams):
-        plt.scatter(diagram[:,0], diagram[:,1])
+        plt.scatter(diagram[:, 0], diagram[:, 1])
     plt.title("Layer 5 Landscape")
-    plt.savefig("{landscape_dir}/layer_{layer_no}.png".format(landscape_dir=landscape_dir, layer_no=layer_no))
+    plt.savefig("{landscape_dir}/layer_{layer_no}.png".format(
+        landscape_dir=landscape_dir, layer_no=layer_no))
     plt.clf()
     print("done")
+
+def get_num(w):
+    if any(l.isdigit() for l in w):
+        return int(''.join([l for l in w if l.isdigit()]))
+    else:
+        return False
+
+def get_files(dn):
+    files = [(im, get_num(im)) for im in os.listdir(dn) if get_num(im) is not False]
+    return [im[0] for im in sorted(files, key=lambda x: x[1])]
+
+def gen_gif(dn):
+    images = [imageio.imread('{dn}/{im}'.format(dn=dn, im=im)) for im in get_files(dn)]
+    imageio.mimsave(dn+'/all.gif', images, fps=3)
+    return
 
 if __name__ == "__main__":
     # Parse aruments
@@ -127,7 +148,10 @@ if __name__ == "__main__":
     g.add_argument('--layer_no', type=int, default=0)
     args = parser.parse_args()
 
+    img_dir = 'images'
     landscape_dir = 'images/landscape'
-    os.makedirs(landscape_dir, exist_ok=True)
 
-    gen_pd(args.dir, args.layer_no)
+    if True:
+        os.makedirs(landscape_dir, exist_ok=True)
+        gen_pd(args.dir, args.layer_no)
+    # gen_gif(img_dir)
