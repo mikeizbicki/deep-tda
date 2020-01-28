@@ -33,7 +33,7 @@ scipy==1.2.1
 six==1.12.0
 tables==3.5.1
 tensorboard==1.13.1
-tensorflow==1.4.0
+tensorflow==1.15.2
 tensorflow-estimator==1.13.0
 tensorflow-gpu==1.4.0
 tensorflow-tensorboard==0.4.0
