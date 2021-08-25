@@ -35,7 +35,7 @@ tables==3.5.1
 tensorboard==1.13.1
 tensorflow==1.4.0
 tensorflow-estimator==1.13.0
-tensorflow-gpu==1.4.0
+tensorflow-gpu==2.5.1
 tensorflow-tensorboard==0.4.0
 tensornets==0.4.0
 termcolor==1.1.0
